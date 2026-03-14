@@ -1,0 +1,7 @@
+pandas==2.2.1
+numpy==1.26.4
+chembl_webresource_client==0.10.9
+rdkit==2023.9.5
+deepchem==2.7.1
+scikit-learn==1.4.1.post1
+tqdm==4.66.2
