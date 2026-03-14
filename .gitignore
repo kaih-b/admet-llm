@@ -1,0 +1,6 @@
+local/
+__pycache__/
+data/
+models/
+.env
+*.ipynb_checkpoints/
