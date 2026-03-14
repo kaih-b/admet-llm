@@ -27,4 +27,4 @@ def fetch_herg_data(output_path: str):
     print(f"Saved raw data to {output_path}")
 
 if __name__ == "__main__":
-    fetch_herg_data("../../data/raw/herg_raw.csv")
+    fetch_herg_data("data/raw/herg_raw.csv")
