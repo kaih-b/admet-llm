@@ -4,11 +4,13 @@ from chembl_webresource_client.new_client import new_client
 import os
 import logging
 
-# Configure logger
+# Setup console logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("fetch_chembl")
 
 def fetch_herg_data(output_path: str):
     logging.info("Connecting to ChEMBL API...")
@@ -17,6 +19,14 @@ def fetch_herg_data(output_path: str):
     # Filter for hERG target (HEMBL240), IC50 metric, and exact measurements (i.e. not bounds)
     query = activity.filter(target_chembl_id="CHEMBL240", standard_type="IC50", standard_relation="=")
     logging.info(f"Retrieving {len(query)} records...")
+    
+    try:
+        data = list(query)
+        logger.info("Data retrieval successful. Converting to DataFrame...")
+    except Exception as e:
+        logger.error(f"Failed to retrieve data from ChEMBL: {e}")
+        return
+    
     data = list(query)
     
     # Convert to a df and filter for essential columns, dropping NaNs for SMILES and IC50 (standard_value)
