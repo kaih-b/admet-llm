@@ -2,14 +2,21 @@
 import pandas as pd
 from chembl_webresource_client.new_client import new_client
 import os
+import logging
+
+# Configure logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 def fetch_herg_data(output_path: str):
-    print("Connecting to ChEMBL API...")
+    logging.info("Connecting to ChEMBL API...")
     activity = new_client.activity
     
     # Filter for hERG target (HEMBL240), IC50 metric, and exact measurements (i.e. not bounds)
     query = activity.filter(target_chembl_id="CHEMBL240", standard_type="IC50", standard_relation="=")
-    print(f"Retrieving {len(query)} records...")
+    logging.info(f"Retrieving {len(query)} records...")
     data = list(query)
     
     # Convert to a df and filter for essential columns, dropping NaNs for SMILES and IC50 (standard_value)
@@ -24,7 +31,7 @@ def fetch_herg_data(output_path: str):
     # Save to raw data folder
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
-    print(f"Saved raw data to {output_path}")
+    logging.info(f"Saved raw data to {output_path}")
 
 if __name__ == "__main__":
     fetch_herg_data("data/raw/herg_raw.csv")
