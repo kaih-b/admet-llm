@@ -1,3 +1,4 @@
+-e git+https://github.com/kaih-b/admet-llm.git@d247978fecca74ec6d3725998ff31821322dda0e#egg=admet_llm
 attrs==25.4.0
 cattrs==25.3.0
 certifi==2026.2.25
@@ -29,3 +30,4 @@ typing_extensions==4.15.0
 tzdata==2025.3
 url-normalize==2.2.1
 urllib3==1.26.20
+xgboost==2.1.4
