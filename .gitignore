@@ -4,3 +4,4 @@ data/
 models/
 .env
 *.ipynb_checkpoints/
+admet_llm.egg-info/
