@@ -6,15 +6,8 @@ from rdkit import Chem
 from deepchem.splits import ScaffoldSplitter
 import deepchem as dc
 import os
-import logging
-
-# Configure console-only logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-logger = logging.getLogger("curate_data")
+from logger import get_console_logger
+logger = get_console_logger(__name__)
 
 # Normalizes (canonicalizes) SMILES strings using RDKit
 def normalize_smiles(smiles: str):

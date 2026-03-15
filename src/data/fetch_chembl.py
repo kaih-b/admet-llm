@@ -2,23 +2,16 @@
 import pandas as pd
 from chembl_webresource_client.new_client import new_client
 import os
-import logging
-
-# Setup console logger
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-logger = logging.getLogger("fetch_chembl")
+from src.logger import get_console_logger
+logger = get_console_logger(__name__)
 
 def fetch_herg_data(output_path: str):
-    logging.info("Connecting to ChEMBL API...")
+    logger.info("Connecting to ChEMBL API...")
     activity = new_client.activity
     
     # Filter for hERG target (HEMBL240), IC50 metric, and exact measurements (i.e. not bounds)
     query = activity.filter(target_chembl_id="CHEMBL240", standard_type="IC50", standard_relation="=")
-    logging.info(f"Retrieving {len(query)} records...")
+    logger.info(f"Retrieving {len(query)} records...")
     
     try:
         data = list(query)
@@ -41,7 +34,7 @@ def fetch_herg_data(output_path: str):
     # Save to raw data folder
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
-    logging.info(f"Saved raw data to {output_path}")
+    logger.info(f"Saved raw data to {output_path}")
 
 if __name__ == "__main__":
     fetch_herg_data("data/raw/herg_raw.csv")
