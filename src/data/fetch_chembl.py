@@ -20,8 +20,6 @@ def fetch_herg_data(output_path: str):
         logger.error(f"Failed to retrieve data from ChEMBL: {e}")
         return
     
-    data = list(query)
-    
     # Convert to a df and filter for essential columns, dropping NaNs for SMILES and IC50 (standard_value)
     df = pd.DataFrame(data)
     cols_to_keep = ['molecule_chembl_id', 'canonical_smiles', 'standard_value', 'standard_units']
