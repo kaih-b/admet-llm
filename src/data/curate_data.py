@@ -6,7 +6,7 @@ from rdkit import Chem
 from deepchem.splits import ScaffoldSplitter
 import deepchem as dc
 import os
-from logger import get_console_logger
+from src.logger import get_console_logger
 logger = get_console_logger(__name__)
 
 # Normalizes (canonicalizes) SMILES strings using RDKit

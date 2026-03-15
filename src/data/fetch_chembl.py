@@ -2,7 +2,7 @@
 import pandas as pd
 from chembl_webresource_client.new_client import new_client
 import os
-from logger import get_console_logger
+from src.logger import get_console_logger
 logger = get_console_logger(__name__)
 
 def fetch_herg_data(output_path: str):
