@@ -87,8 +87,6 @@ def train_baseline():
         'pIC50_pred': y_pred,
         'residual': y_test - y_pred,
     })
-    results_df['rmse'] = None
-    results_df['r2'] = None
     results_out_dir = "data/results"
     os.makedirs(results_out_dir, exist_ok=True)
     results_df.to_csv(os.path.join(results_out_dir, "xgboost_baseline_test_results.csv"), index=False)
