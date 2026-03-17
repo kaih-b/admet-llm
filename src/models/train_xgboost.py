@@ -90,12 +90,13 @@ def train_baseline():
     results_out_dir = "data/results"
     os.makedirs(results_out_dir, exist_ok=True)
     results_df.to_csv(os.path.join(results_out_dir, "xgboost_baseline_test_results.csv"), index=False)
-    logger.info("Saved baseline test results to data/results/")
     
     # Save metrics to JSON
     metrics = {"rmse": float(rmse), "r2": float(r2)}
     with open(os.path.join(results_out_dir, "xgboost_metrics.json"), "w") as f:
         json.dump(metrics, f, indent=4)
+    
+    logger.info("Saved baseline test results to data/results/")
     
     # Save model
     os.makedirs(model_out_dir, exist_ok=True)
