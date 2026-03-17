@@ -19,4 +19,4 @@ The $R^2$ of ~0.22 indicates that 2D molecular fingerprint-based models capture 
 The hERG channel can bind to many different molecule shapes. Because Morgan Fingerprints map basic 2D atom connections, they leave out the 3D geometry and electron properties necessary to make chemically accurate predictions.
 
 ### Next Steps 
-Because 2D representations failed to capture the structural syntax required for this target, the next phase of this project will utilize a Transformer-based LLM (ChemBERTa), as was the initial plan, to learn the structural rules directly from the SMILES sequences.
+Because 2D representations failed to capture the structural syntax required for this target, the main phase of this project will utilize a Transformer-based LLM (ChemBERTa), as was the initial plan, to learn the structural rules directly from the SMILES sequences. However, the next phase will establish another baseline, a GNN model, to accurately reflect the industry's current state-of-the-art techniques.
