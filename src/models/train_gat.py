@@ -124,7 +124,7 @@ def train_gat():
     results_df.to_csv(os.path.join(results_out_dir, "gat_baseline_test_results.csv"), index=False)
     
     # Save metrics to JSON
-    metrics = {"rmse": float(rmse), "r2": float(r2)}
+    metrics = {"rmse": float(rmse), "r2": float(-r2)}
     with open(os.path.join(results_out_dir, "gat_metrics.json"), "w") as f:
         json.dump(metrics, f, indent=4)
         

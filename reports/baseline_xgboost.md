@@ -4,13 +4,13 @@
 Establish a machine learning baseline for hERG pIC50 prediction before training a computationally expensive LLM (ChemBERTa). 
 
 ## Procedure
-* **Inputs:** 2D Morgan Fingerprints (Radius 2, 2048 bits) generated via RDKit `MorganGenerator`
-* **Algorithm:** XGBoost Regressor (1000 estimators, early stopping)
-* **Split:** 80/10/10 DeepChem Scaffold Split
+* **Inputs**: 2D Morgan Fingerprints (Radius 2, 2048 bits) generated via RDKit `MorganGenerator`
+* **Algorithm**: XGBoost Regressor (1000 estimators, early stopping)
+* **Split**: 80/10/10 DeepChem Scaffold Split
 
 ## Test Set Results
-* **RMSE:** 0.7399
-* **R^2:** 0.2198
+* **RMSE**: 0.7399
+* **R^2**: 0.2198
 
 ## Scientific Analysis
 The $R^2$ of ~0.22 indicates that 2D molecular fingerprint-based models capture little of the variance in hERG binding affinity. 
