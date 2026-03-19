@@ -9,11 +9,11 @@ Establish a machine learning baseline for hERG pIC50 prediction before training 
 * **Split**: 80/10/10 DeepChem Scaffold Split
 
 ## Test Set Results
-* **RMSE**: 0.7399
-* **R^2**: 0.2198
+* **RMSE**: 0.7337
+* **R^2**: 0.2328
 
 ## Scientific Analysis
-The $R^2$ of ~0.22 indicates that 2D molecular fingerprint-based models capture little of the variance in hERG binding affinity. 
+The $R^2$ of ~0.23 indicates that 2D molecular fingerprint-based models capture little of the variance in hERG binding affinity. 
 
 ### Why did it struggle?
 The hERG channel can bind to many different molecule shapes. Because Morgan Fingerprints map basic 2D atom connections, they leave out the 3D geometry and electron properties necessary to make chemically accurate predictions.
