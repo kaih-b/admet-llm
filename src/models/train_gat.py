@@ -111,7 +111,7 @@ def train_gat():
     r2 = r2_score(y_true, y_pred)
     logger.info(f"\nGAT Test Metrics:")
     logger.info(f"RMSE: {rmse:.4f}")
-    logger.info(f"R^2 : {-r2:.4f}")
+    logger.info(f"R^2 : {r2:.4f}")
     
     # Save predictions and residuals to CSV for later analysis
     os.makedirs(results_out_dir, exist_ok=True)
