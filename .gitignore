@@ -7,3 +7,4 @@ models/
 *.ipynb_checkpoints/
 admet_llm.egg-info/
 .DS_Store
+wandb/
