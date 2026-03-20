@@ -11,6 +11,7 @@ from transformers import (
 )
 from sklearn.metrics import mean_squared_error, r2_score
 import os
+import sys
 from src.logger import get_console_logger
 logger = get_console_logger(__name__)
 
@@ -28,10 +29,20 @@ def compute_metrics(eval_pred):
 
 # Trains and tunes model
 def tune_chemberta():
-    data_dir = "data/processed"
-    model_out_dir = "models/chemberta_herg"
+
+    # Check if the script is running inside Google Colab
+    if 'google.colab' in sys.modules:
+        logger.info("Google Colab cloud environment detected")
+        base_path = "/content/drive/Othercomputers/My Mac/admet-llm"
+    else:
+        logger.info("Local environment detected")
+        base_path = "."
+
+    # Adjust pathnames to work for local and cloud environments
+    data_dir = os.path.join(base_path, "data/processed")
+    model_out_dir = os.path.join(base_path, "models/chemberta_herg")
+    results_out_dir = os.path.join(base_path, "data/results")
     model_name = "DeepChem/ChemBERTa-77M-MTR"
-    results_out_dir = "data/results"
     
     # Load data
     logger.info("Loading train, valid, and test datasets...")
@@ -74,7 +85,7 @@ def tune_chemberta():
     logger.info("Setting up training arguments...")
     training_args = TrainingArguments(
         output_dir=model_out_dir,
-        evaluation_strategy="epoch", # Check performance after each epoch
+        eval_strategy="epoch", # Check performance after each epoch
         save_strategy="epoch", # Save checkpoint after each epoch
         learning_rate=2e-5, # Very small; this model's pre-training should be good
         per_device_train_batch_size=16,
@@ -84,7 +95,7 @@ def tune_chemberta():
         load_best_model_at_end=True, # Automatically reload the best epoch (by validation RMSE)
         metric_for_best_model="rmse",
         greater_is_better=False, # RMSE --> lower is better
-        logging_dir="logs",
+        report_to = "wandb",
         logging_steps=50,
         seed=random_seed
     )
@@ -111,7 +122,7 @@ def tune_chemberta():
     
     # Save metrics to JSON
     metrics = {"rmse": float(test_results['eval_rmse']), "r2": float((test_results['eval_r2']))}
-    with open(os.path.join(results_out_dir, "gat_metrics.json"), "w") as f:
+    with open(os.path.join(results_out_dir, "chemberta_metrics.json"), "w") as f:
         json.dump(metrics, f, indent=4)
     
     # Save final model and tokenizer
