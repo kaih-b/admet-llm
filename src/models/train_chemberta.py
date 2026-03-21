@@ -109,7 +109,7 @@ def tune_chemberta():
         compute_metrics=compute_metrics
     )
     
-    # Train model
+    # Train and tune model
     logger.info("Starting tuning. This will take some time...")
     trainer.train()
     
@@ -119,17 +119,15 @@ def tune_chemberta():
     logger.info(f"\nLLM (ChemBERTa) Test Metrics:")
     logger.info(f"RMSE: {test_results['eval_rmse']:.4f}")
     logger.info(f"R^2 : {test_results['eval_r2']:.4f}")
-    
     logger.info("Generating predictions for error analysis...")
     prediction_output = trainer.predict(tokenized_datasets["test"])
     raw_predictions = prediction_output.predictions.flatten()
     
-    # Attach the predictions to your original pandas dataframe
+    # Attach the predictions to the dataframe
     test_df["pIC50_pred"] = raw_predictions
     
-    # Calculate the absolute error so you can easily sort by the worst failures
-    test_df["residual"] = test_df["pIC50"] - test_df["predicted_pIC50"]
-    
+    # Calculate residuals
+    test_df["residual"] = test_df["pIC50"] - test_df["pIC50_pred"]
     os.makedirs(results_out_dir, exist_ok=True)
     
     # Save the dataframe to a CSV
