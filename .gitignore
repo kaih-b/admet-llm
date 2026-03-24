@@ -5,6 +5,7 @@ data/embeddings/
 
 models/*
 !models/hybrid/
+!models/hybrid_classifier/
 
 .env
 admet_llm.egg-info/
