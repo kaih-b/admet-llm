@@ -104,7 +104,9 @@ def main():
     logger.info(f"Saved metrics to {metrics_path}")
 
     # Predictions
+    test_df = pd.read_csv(os.path.join(data_dir, "test_herg.csv"))
     results_df = pd.DataFrame({
+        "smiles": test_df["smiles"],
         "true": y_test,
         "predicted": y_pred_class,
         "predicted_probability": y_pred_proba
