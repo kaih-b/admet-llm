@@ -1,10 +1,11 @@
 local/
 __pycache__/
 data/embeddings/
-data/wandb
-models/
-!src/models/
+**/wandb/
+
+models/*
+!models/hybrid/
+
 .env
-*.ipynb_checkpoints/
 admet_llm.egg-info/
 .DS_Store
