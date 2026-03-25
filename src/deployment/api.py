@@ -15,31 +15,32 @@ class MoleculeRequest(BaseModel):
 async def lifespan(app: FastAPI):
     print("Loading models into memory...")
     
-    # Load ChemBERTa
+    # Load ChemBERTa 
     model_name = "DeepChem/ChemBERTa-77M-MTR"
     app.state.tokenizer = AutoTokenizer.from_pretrained(model_name)
     app.state.llm_extractor = AutoModel.from_pretrained(model_name)
     
-    # Configure GPU, MPS, or CPU for cross-device performance
+     # Configure GPU, MPS, or CPU for cross-device performance
     app.state.device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     app.state.llm_extractor.to(app.state.device)
     app.state.llm_extractor.eval()
     
-    # Load XGBoost
-    xgb_path = "models/hybrid/xgb_hybrid.json" 
-    app.state.xgb_model = xgb.XGBRegressor()
-    app.state.xgb_model.load_model(xgb_path)
+    # Initialize hybrid regressor
+    app.state.xgb_regressor = xgb.XGBRegressor() 
+    app.state.xgb_regressor.load_model("models/xgb_hybrid.json")
+    
+    # Initialize hybrid classifier
+    app.state.xgb_classifier = xgb.XGBClassifier()
+    app.state.xgb_classifier.load_model("models/xgb_classifier_hybrid.json")
     
     print("Models successfully loaded and ready for inference.")
-    
-    yield # API runs here
-    
-    print("Shutting down API and clearing memory...")
+    yield
+    print("Shutting down API...")
 
 # Initialize the FastAPI app
 app = FastAPI(
     title="hERG Toxicity Predictor API",
-    description="An API that uses a ChemBERTa + XGBoost hybrid model to predict hERG pIC50.",
+    description="An API that uses a ChemBERTa + XGBoost hybrid pipeline to predict toxicity.",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -48,7 +49,7 @@ app = FastAPI(
 @app.post("/predict")
 def predict_toxicity(request: Request, payload: MoleculeRequest):
     try:
-        # Step A: Tokenize using the app.state
+        # Tokenize using the app.state
         inputs = request.app.state.tokenizer(
             payload.smiles, 
             padding="max_length", 
@@ -58,20 +59,30 @@ def predict_toxicity(request: Request, payload: MoleculeRequest):
         )
         inputs = {k: v.to(request.app.state.device) for k, v in inputs.items()}
         
-        # Extract the 768-D [CLS] embedding
+        # Extract the [CLS] embedding
         with torch.no_grad():
             outputs = request.app.state.llm_extractor(**inputs)
             cls_embedding = outputs.last_hidden_state[:, 0, :]
-            
         embedding_array = cls_embedding.cpu().numpy()
         
-        # Predict the pIC50
-        prediction = request.app.state.xgb_model.predict(embedding_array)[0]
+        # Prediction
+        # Regression
+        predicted_pIC50 = float(request.app.state.xgb_regressor.predict(embedding_array)[0])
+        # Classification
+        toxicity_prob = float(request.app.state.xgb_classifier.predict_proba(embedding_array)[0][1])
+        is_toxic = bool(request.app.state.xgb_classifier.predict(embedding_array)[0])
         
         # Return the JSON response
         return {
             "smiles": payload.smiles,
-            "predicted_pIC50": float(prediction),
+            "classification": {
+                "is_toxic": is_toxic,
+                "confidence_score": round(toxicity_prob, 4),
+                "warning": "High risk of hERG liability" if is_toxic else "Appears safe"
+            },
+            "regression": {
+                "predicted_pIC50": round(predicted_pIC50, 4)
+            },
             "status": "success"
         }
         
