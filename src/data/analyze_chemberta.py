@@ -8,7 +8,7 @@ logger = get_console_logger(__name__)
 def analyze_residuals():
     # Define paths
     results_dir = "data/results"
-    plots_dir = "assets" # Or wherever you keep your README images
+    plots_dir = "assets"
     os.makedirs(plots_dir, exist_ok=True)
     
     csv_path = os.path.join(results_dir, "chemberta_test_predictions.csv")

@@ -13,6 +13,16 @@ The final model is a hybrid, combining a pre-trained Large Language Model (LLM) 
     - **The Regressor**: Provides a continuous pIC50 estimate for Structure-Activity Relationship (SAR) analysis.
 4. **Deployment**: The entire pipeline is packaged in an isolated Docker container with a FastAPI endpoint.
 
+## Dataset & Preprocessing
+
+hERG bioactivity data is fetched directly from the ChEMBL API by selecting all compounds with exact IC50 measurements against the hERG target (`CHEMBL240`). The extraction step retains only ChEMBL-provided SMILES, molecule IDs, and numeric IC50 values, removing entries with missing structures or non-numeric fields.
+
+During curation, SMILES strings are re-canonicalized with RDKit to ensure structural consistency. Duplicate molecules (i.e., identical canonical SMILES appearing in multiple assays) are collapsed by taking the median IC50, producing a single representative potency value per unique structure. IC50 values (typically standardized to nM by ChEMBL) are then converted to pIC50 using:
+
+  $pIC50 = 9 − log₁₀(IC50)$
+
+To prevent scaffold leakage during modeling, the dataset is split using an 80/10/10 Murcko scaffold split via DeepChem. This groups molecules by core structural motifs before division, yielding structurally disjoint train, validation, and test sets saved as separate CSV files.
+
 ## Model Progression
 Before arriving at the dual-prediction hybrid architecture, three independent baselines were established using an 80/10/10 scaffold split on roughly 9,500 compounds from ChEMBL:
 
@@ -112,3 +122,10 @@ The API returns a JSON response providing both a safety warning and a raw affini
   "status": "success"
 }
 ```
+
+## Limitations & Future Steps
+
+- Public ChEMBL hERG assays contain inter-lab noise; continuous values are not fully reliable.
+- Frozen LLM embeddings limit task-specific adaptation.
+- No uncertainty quantification; future work could incorporate MC dropout, conformal prediction, or ensemble variance.
+- Model lacks 3D conformer-based features; integration of RDKit UFF/MUFFIN or SE(3) transformers may improve $R^2$.
