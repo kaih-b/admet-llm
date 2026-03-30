@@ -17,7 +17,7 @@ The final model is a hybrid, combining a pre-trained Large Language Model (LLM) 
 
 hERG bioactivity data is fetched directly from the ChEMBL API by selecting all compounds with exact IC50 measurements against the hERG target (`CHEMBL240`). The extraction step retains only ChEMBL-provided SMILES, molecule IDs, and numeric IC50 values, removing entries with missing structures or non-numeric fields.
 
-During curation, SMILES strings are re-canonicalized with RDKit to ensure structural consistency. Duplicate molecules (i.e., identical canonical SMILES appearing in multiple assays) are collapsed by taking the median IC50, producing a single representative potency value per unique structure. IC50 values (typically standardized to nM by ChEMBL) are then converted to pIC50 using:
+During curation, SMILES strings are re-canonicalized with RDKit to ensure structural consistency. Duplicate molecules (i.e., identical canonical SMILES appearing in multiple assays) are collapsed by taking the median IC50, producing a single representative potency value per unique structure. IC50 values (in nM) are then converted to pIC50 using:
 
   $pIC50 = 9 − log₁₀(IC50)$
 
@@ -28,7 +28,7 @@ Before arriving at the dual-prediction hybrid architecture, three independent ba
 
 1. **Classical Machine Learning (XGBoost + Morgan Fingerprints)**: Using 2D topological bit-vectors yielded an $R^2$ of ~0.23. The model captured basic variance but struggled because 2D fingerprints lack the 3D geometric and electronic information required to model the hERG binding pocket.
 2. **Graph Neural Networks (GCN & GAT)**: Training topological graphs from a random initialization largely failed. A standard GCN captured minimal variance ($R^2$ 0.06), while a multi-head Graph Attention Network (GAT) severely overfit the training data ($R^2$ -0.22).
-3. **End-to-End LLM Tuning (ChemBERTa)**: Attempting to tune the full 77-million parameter ChemBERTa model with a new regression head also resulted in severe overfitting (R^2 -0.06). While the transformer architecture has the capacity to learn 3D mechanics, a dataset of <10,000 samples resulted in data starvation.
+3. **End-to-End LLM Tuning (ChemBERTa)**: Attempting to tune the full 77-million parameter ChemBERTa model with a new regression head also resulted in severe overfitting ($R^2$ -0.06). While the transformer architecture has the capacity to learn 3D mechanics, a dataset of <10,000 samples resulted in data starvation.
 
 **The Hybrid Pivot**: To solve the data starvation problem, ChemBERTa was frozen and used purely as a feature extractor. Passing its contextual embeddings into XGBoost combined the 3D structural awareness of the LLM with the regression stability of gradient boosted trees. This approach outperformed all baselines, increasing the XGBoost + Morgan Fingerprint $R^2$ by ~15%.
 
@@ -48,7 +48,7 @@ While an $R^2$ of ~0.27 appears low, public biological datasets like ChEMBL cont
 
 ## Classification Pivot
 
-Predicting exact continuous pIC50 values from public ChEMBL data is heavily penalized by inter-lab noise. To align with real-world biopharma process, where the question is a binary safe vs. toxic, the target was binarized using the industry-standard threshold of pIC50 $\ge$ 5.0. As with the hybrid regressor, the hyperparameters were tuned with a 100-trial Bayesian Optuna search, maximizing AUC.
+Predicting exact continuous pIC50 values from public ChEMBL data is heavily penalized by inter-lab noise. To align with real-world biopharma workflows, where the question is a binary safe vs. toxic, the target was binarized using the industry-standard threshold of pIC50 $\ge$ 5.0 (meaning IC50 $\ge$ 10 μM). As with the hybrid regressor, the hyperparameters were tuned with a 100-trial Bayesian Optuna search, maximizing AUC.
 
 | Metric | Score | Description |
 | :--- | :--- | :--- |
@@ -104,7 +104,7 @@ Open your web browser and navigate to the automatically generated Swagger UI doc
 
 `http://127.0.0.1:8000/docs`
 
-From there, you can click `POST /predict`, then `Try it out`, enter a SMILES string (e.g. Aspirin: `CC(=O)OC1=CC=CC=C1C(=O)O)`), and execute the request to receive a real-time toxicity prediction based on hERG pIC50.
+From there, you can click `POST /predict`, then `Try it out`, enter a SMILES string (e.g. Aspirin: `CC(=O)OC1=CC=CC=C1C(=O)O`), and execute the request to receive a real-time toxicity prediction based on hERG pIC50.
 
 The API returns a JSON response providing both a safety warning and a raw affinity estimate:
 
@@ -121,6 +121,24 @@ The API returns a JSON response providing both a safety warning and a raw affini
   },
   "status": "success"
 }
+```
+
+## Reproducibility
+To retrain models from scratch:
+```bash
+git clone https://github.com/kaih-b/admet-llm.git
+cd admet-llm
+python3 -m venv local
+source local/bin/activate
+
+pip install -r requirements.txt
+python3 src/data/fetch_chembl.py
+python3 src/data/curate_data.py
+python3 src/data/extract_embeddings.py
+python3 src/models/optimize_hybrid.py
+python3 src/models/optimize_hybrid_classifier.py
+python3 src/models/train_hybrid.py
+python3 src/models/train_hybrid_classifier.py
 ```
 
 ## Limitations & Future Steps
