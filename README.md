@@ -19,7 +19,7 @@ hERG bioactivity data is fetched directly from the ChEMBL API by selecting all c
 
 During curation, SMILES strings are re-canonicalized with RDKit to ensure structural consistency. Duplicate molecules (i.e., identical canonical SMILES appearing in multiple assays) are collapsed by taking the median IC50, producing a single representative potency value per unique structure. IC50 values (in nM) are then converted to pIC50 using:
 
-  $pIC50 = 9 − log₁₀(IC50)$
+    pIC50 = 9 − log₁₀(IC50)
 
 To prevent scaffold leakage during modeling, the dataset is split using an 80/10/10 Murcko scaffold split via DeepChem. This groups molecules by core structural motifs before division, yielding structurally disjoint train, validation, and test sets saved as separate CSV files.
 
